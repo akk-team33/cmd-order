@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -38,12 +37,8 @@ public class MovementTest {
         dateTime = ZonedDateTime.of(2016, 11, 28, 10, 13, 43, 1000000, ZoneId.systemDefault());
         Walk.through(subject.getParent())
                 .when(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-                .then(path -> {
-                    try {
-                        Files.delete(path);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                .then(Files::delete)
+                .go((p, e) -> {
                 });
         Files.createDirectories(subject.getParent());
         Files.copy(origin, subject, REPLACE_EXISTING, COPY_ATTRIBUTES);
