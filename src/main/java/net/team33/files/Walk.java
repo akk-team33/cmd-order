@@ -26,13 +26,17 @@ public class Walk {
         return new Walk(path);
     }
 
-    public final Condition when(final Predicate<Path> predicate) {
-        return new Condition(predicate);
-    }
-
     public final Walk doing(final Consumer consumer) {
         consumers.add(consumer);
         return this;
+    }
+
+    public final Walk ignore(final Predicate<Path> predicate) {
+        return this;
+    }
+
+    public final Condition when(final Predicate<Path> predicate) {
+        return new Condition(predicate);
     }
 
     public final void go(final BiConsumer<Path, Exception> catching) {

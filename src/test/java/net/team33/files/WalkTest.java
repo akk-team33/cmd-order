@@ -29,6 +29,17 @@ public class WalkTest {
             Paths.get("src", "main", "java", "net", "team33", "order", "Pattern.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Resolver.java")
     ));
+    private static final Set<Path> NO_FILES = new TreeSet<>(Arrays.asList(
+            Paths.get("src", "main", "java"),
+            Paths.get("src", "main", "java", "net"),
+            Paths.get("src", "main", "java", "net", "team33"),
+            Paths.get("src", "main", "java", "net", "team33", "order"),
+            Paths.get("src", "main", "java", "net", "team33", "order", "Args.java"),
+            Paths.get("src", "main", "java", "net", "team33", "order", "Main.java"),
+            Paths.get("src", "main", "java", "net", "team33", "order", "Movement.java"),
+            Paths.get("src", "main", "java", "net", "team33", "order", "Pattern.java"),
+            Paths.get("src", "main", "java", "net", "team33", "order", "Resolver.java")
+    ));
     private static final Set<Path> DIRECTORIES = new TreeSet<>(Arrays.asList(
             Paths.get("src", "main", "java"),
             Paths.get("src", "main", "java", "net"),
@@ -44,6 +55,18 @@ public class WalkTest {
             Paths.get("src", "main", "java", "net", "team33", "order", "Pattern.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Resolver.java")
     ));
+
+    @Test
+    public void throughSome() throws Exception {
+        final Set<Path> result = new TreeSet<>();
+        final Map<Path, Exception> problems = new TreeMap<>();
+        Walk.through(Paths.get("src", "main", "java"))
+                .ignore(path -> path.equals(Paths.get("src", "main", "java", "net", "team33", "files")))
+                .doing(result::add)
+                .go(problems::put);
+        Assert.assertEquals(NO_FILES, result);
+        Assert.assertEquals(Collections.emptyMap(), problems);
+    }
 
     @Test
     public void throughAll() throws Exception {
@@ -63,9 +86,9 @@ public class WalkTest {
         final Map<Path, Exception> problems = new TreeMap<>();
         Walk.through(Paths.get("src", "main", "java"))
                 .when(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-                .then(path -> regular.add(path))
+                .then(regular::add)
                 .when(path -> Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS))
-                .then(path -> directories.add(path))
+                .then(directories::add)
                 .go(problems::put);
         Assert.assertEquals(REGULAR, regular);
         Assert.assertEquals(DIRECTORIES, directories);
