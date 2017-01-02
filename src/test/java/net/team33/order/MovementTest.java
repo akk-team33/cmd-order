@@ -37,8 +37,8 @@ public class MovementTest {
         dateTime = ZonedDateTime.of(2016, 11, 28, 10, 13, 43, 1000000, ZoneId.systemDefault());
         Walk.through(subject.getParent())
                 .when(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-                .then(Files::delete)
-                .go((p, e) -> {
+                .apply(Files::delete)
+                .catching((p, e) -> {
                 });
         Files.createDirectories(subject.getParent());
         Files.copy(origin, subject, REPLACE_EXISTING, COPY_ATTRIBUTES);

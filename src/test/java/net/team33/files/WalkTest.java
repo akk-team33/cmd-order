@@ -33,6 +33,7 @@ public class WalkTest {
             Paths.get("src", "main", "java"),
             Paths.get("src", "main", "java", "net"),
             Paths.get("src", "main", "java", "net", "team33"),
+            Paths.get("src", "main", "java", "net", "team33", "files"),
             Paths.get("src", "main", "java", "net", "team33", "order"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Args.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Main.java"),
@@ -61,9 +62,10 @@ public class WalkTest {
         final Set<Path> result = new TreeSet<>();
         final Map<Path, Exception> problems = new TreeMap<>();
         Walk.through(Paths.get("src", "main", "java"))
-                .ignore(path -> path.equals(Paths.get("src", "main", "java", "net", "team33", "files")))
-                .doing(result::add)
-                .go(problems::put);
+                .options(LinkOption.NOFOLLOW_LINKS)
+                .recursive(path -> !path.equals(Paths.get("src", "main", "java", "net", "team33", "files")))
+                .apply(result::add)
+                .catching(problems::put);
         Assert.assertEquals(NO_FILES, result);
         Assert.assertEquals(Collections.emptyMap(), problems);
     }
@@ -71,12 +73,10 @@ public class WalkTest {
     @Test
     public void throughAll() throws Exception {
         final Set<Path> result = new TreeSet<>();
-        final Map<Path, Exception> problems = new TreeMap<>();
         Walk.through(Paths.get("src", "main", "java"))
-                .doing(result::add)
-                .go(problems::put);
+                .apply(result::add)
+                .go();
         Assert.assertEquals(EXPECTED, result);
-        Assert.assertEquals(Collections.emptyMap(), problems);
     }
 
     @Test
@@ -85,11 +85,12 @@ public class WalkTest {
         final Set<Path> directories = new TreeSet<>();
         final Map<Path, Exception> problems = new TreeMap<>();
         Walk.through(Paths.get("src", "main", "java"))
+                //.recursive(path -> true)
                 .when(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-                .then(regular::add)
+                .apply(regular::add)
                 .when(path -> Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS))
-                .then(directories::add)
-                .go(problems::put);
+                .apply(directories::add)
+                .catching(problems::put);
         Assert.assertEquals(REGULAR, regular);
         Assert.assertEquals(DIRECTORIES, directories);
         Assert.assertEquals(Collections.emptyMap(), problems);
