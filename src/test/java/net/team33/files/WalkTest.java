@@ -22,6 +22,7 @@ public class WalkTest {
             Paths.get("src", "main", "java", "net", "team33"),
             Paths.get("src", "main", "java", "net", "team33", "files"),
             Paths.get("src", "main", "java", "net", "team33", "files", "Walk.java"),
+            Paths.get("src", "main", "java", "net", "team33", "files", "Directory.java"),
             Paths.get("src", "main", "java", "net", "team33", "order"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Args.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Main.java"),
@@ -50,6 +51,7 @@ public class WalkTest {
     ));
     private static final Set<Path> REGULAR = new TreeSet<>(Arrays.asList(
             Paths.get("src", "main", "java", "net", "team33", "files", "Walk.java"),
+            Paths.get("src", "main", "java", "net", "team33", "files", "Directory.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Args.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Main.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Movement.java"),
@@ -63,7 +65,7 @@ public class WalkTest {
         final Map<Path, Exception> problems = new TreeMap<>();
         Walk.through(Paths.get("src", "main", "java"))
                 .options(LinkOption.NOFOLLOW_LINKS)
-                .recursive(path -> !path.equals(Paths.get("src", "main", "java", "net", "team33", "files")))
+                .recursive(path -> !path.endsWith(Paths.get("files")))
                 .apply(result::add)
                 .catching(problems::put);
         Assert.assertEquals(NO_FILES, result);
