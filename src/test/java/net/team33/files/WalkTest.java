@@ -22,8 +22,6 @@ public class WalkTest {
     public static final Walk.Predicate IS_DIRECTORY = path -> Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS);
 
     private static final List<Path> ALL_REGULAR_FILES = Arrays.asList(
-            Paths.get("src", "main", "java", "net", "team33", "files", "Course.java"),
-            Paths.get("src", "main", "java", "net", "team33", "files", "Directory.java"),
             Paths.get("src", "main", "java", "net", "team33", "files", "Walk.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Args.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Main.java"),
@@ -45,8 +43,6 @@ public class WalkTest {
             Paths.get("src", "main", "java", "net"),
             Paths.get("src", "main", "java", "net", "team33"),
             Paths.get("src", "main", "java", "net", "team33", "files"),
-            Paths.get("src", "main", "java", "net", "team33", "files", "Course.java"),
-            Paths.get("src", "main", "java", "net", "team33", "files", "Directory.java"),
             Paths.get("src", "main", "java", "net", "team33", "files", "Walk.java"),
             Paths.get("src", "main", "java", "net", "team33", "order"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Args.java"),

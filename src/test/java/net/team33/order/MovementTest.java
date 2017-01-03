@@ -38,8 +38,7 @@ public class MovementTest {
         Walk.through(subject.getParent())
                 .when(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
                 .apply(Files::delete)
-                .catching((p, e) -> {
-                });
+                .run();
         Files.createDirectories(subject.getParent());
         Files.copy(origin, subject, REPLACE_EXISTING, COPY_ATTRIBUTES);
         Files.setLastModifiedTime(subject, FileTime.from(dateTime.toInstant()));
