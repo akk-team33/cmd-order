@@ -23,8 +23,8 @@ public class ResolverTest {
     @Test
     public void apply() throws Exception {
         Assert.assertEquals(
-                Paths.get("target/test/ResolverTest/2016/11/19/113717001.MyFile.jpg"),
-                resolver.apply(FileTime.from(dateTime.toInstant()), "MyFile.jpg")
+                Paths.get("target/test/ResolverTest/2016/11/19/"),
+                resolver.apply(FileTime.from(dateTime.toInstant()))
         );
     }
 }

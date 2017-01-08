@@ -32,7 +32,7 @@ public class MovementTest {
         origin = Paths.get("src", "test", "java", "net", "team33", "order", FILENAME);
         subject = Paths.get("target", "test", "movement", FILENAME);
         targetRoot = Paths.get("target", "test", "movement", "moved");
-        result = Paths.get("target", "test", "movement", "moved", "2016", "11", "28", "101343000." + FILENAME);
+        result = Paths.get("target", "test", "movement", "moved", "2016", "11", "28", FILENAME);
         movement = new Movement(targetRoot);
         dateTime = ZonedDateTime.of(2016, 11, 28, 10, 13, 43, 1000000, ZoneId.systemDefault());
         Walk.through(subject.getParent())
@@ -49,7 +49,7 @@ public class MovementTest {
         Assert.assertTrue(Files.exists(subject));
         Assert.assertFalse(Files.exists(result));
         movement.accept(subject);
-        Assert.assertTrue(Files.exists(result));
         Assert.assertFalse(Files.exists(subject));
+        Assert.assertTrue(Files.exists(result));
     }
 }

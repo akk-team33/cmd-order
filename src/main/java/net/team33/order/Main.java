@@ -5,57 +5,95 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.FileTime;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
-public final class Main {
+public final class Main implements Runnable {
+
+    private final LinkOption[] options = new LinkOption[]{NOFOLLOW_LINKS};
+    private final Map<Path, Exception> problems = new TreeMap<>();
+    private final List<Path> skipped = new LinkedList<>();
+    private final List<Path> ignored = new LinkedList<>();
+    private final Args args;
+    private final Movement movement;
+
+    public Main(final Args args) {
+        this.args = args;
+        this.movement = new Movement(args.target);
+    }
 
     public static void main(final String[] args) {
-        proceed(new Args(args));
+        new Main(new Args(args)).run();
     }
 
-    private static void proceed(final Args args) {
-        if (args.isScheduled()) {
-            throw new UnsupportedOperationException("not yet implemented");
-        } else {
-            order(args.target, args.pattern, args.sources);
+    @Override
+    public final void run() {
+        proceed(args.sources.iterator());
+
+        if (0 < skipped.size()) {
+            System.out.println();
+            System.out.println("[skipped]");
+            skipped.forEach(System.out::println);
+        }
+
+        if (0 < ignored.size()) {
+            System.out.println();
+            System.out.println("[ignored]");
+            ignored.forEach(System.out::println);
+        }
+
+        if (0 < problems.size()) {
+            System.out.println();
+            System.out.println("[problems]");
+            problems.entrySet().forEach(entry -> {
+                System.out.print(entry.getKey());
+                System.out.println(" -> ");
+                entry.getValue().printStackTrace(System.out);
+                System.out.println();
+            });
         }
     }
 
-    private static void order(final Path target, final Pattern pattern, final Iterable<Path> sources) {
-        for (final Path source : sources) {
-            try {
-                order(target, pattern, source);
-            } catch (IOException e) {
-                e.printStackTrace(System.out);
+    private void proceed(final Iterator<Path> iterator) {
+        while (iterator.hasNext()) {
+            proceed(iterator.next());
+        }
+    }
+
+    private void proceed(final Path path) {
+        System.out.println(path);
+        if (path.equals(args.target)) {
+            skipped.add(path);
+        } else if (Files.isRegularFile(path, options)) {
+            movement(path);
+        } else if (Files.isDirectory(path, options)) {
+            recursion(path);
+        } else {
+            ignored.add(path);
+        }
+    }
+
+    private void movement(final Path path) {
+        try {
+            movement.accept(path);
+        } catch (final IOException caught) {
+            problems.put(path, caught);
+        }
+    }
+
+    private void recursion(final Path path) {
+        try {
+            try (final DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
+                proceed(paths.iterator());
             }
-        }
-    }
-
-    private static void order(final Path target, final Pattern pattern, final Path source) throws IOException {
-        System.out.print(source);
-        System.out.print(" ");
-        if (Files.isDirectory(source, LinkOption.NOFOLLOW_LINKS)) {
-            orderDir(target, pattern, source);
-        } else {
-            orderRegular(target, pattern, source);
-        }
-    }
-
-    private static void orderRegular(final Path target, final Pattern pattern, final Path source) throws IOException {
-        final FileTime time = Files.getLastModifiedTime(source, LinkOption.NOFOLLOW_LINKS);
-        final Path resolved = target.resolve(pattern.resolve(time, source.getFileName().toString()));
-        System.out.print("-> ");
-        System.out.print(resolved);
-        Files.move(source, resolved, StandardCopyOption.COPY_ATTRIBUTES);
-        System.out.println(" OK");
-    }
-
-    private static void orderDir(final Path target, final Pattern pattern, final Path source) throws IOException {
-        try (final DirectoryStream<Path> paths = Files.newDirectoryStream(source)) {
-            System.out.println("...");
-            order(target, pattern, paths);
+            Files.delete(path);
+        } catch (final IOException ignored) {
         }
     }
 }

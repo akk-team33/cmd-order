@@ -26,7 +26,6 @@ public class WalkTest {
             Paths.get("src", "main", "java", "net", "team33", "order", "Args.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Main.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Movement.java"),
-            Paths.get("src", "main", "java", "net", "team33", "order", "Pattern.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Resolver.java")
     );
 
@@ -34,7 +33,6 @@ public class WalkTest {
             Paths.get("src", "main", "java", "net", "team33", "order", "Args.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Main.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Movement.java"),
-            Paths.get("src", "main", "java", "net", "team33", "order", "Pattern.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Resolver.java")
     );
 
@@ -48,7 +46,6 @@ public class WalkTest {
             Paths.get("src", "main", "java", "net", "team33", "order", "Args.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Main.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Movement.java"),
-            Paths.get("src", "main", "java", "net", "team33", "order", "Pattern.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Resolver.java")
     );
 
@@ -61,7 +58,6 @@ public class WalkTest {
             Paths.get("src", "main", "java", "net", "team33", "order", "Args.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Main.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Movement.java"),
-            Paths.get("src", "main", "java", "net", "team33", "order", "Pattern.java"),
             Paths.get("src", "main", "java", "net", "team33", "order", "Resolver.java")
     );
 
