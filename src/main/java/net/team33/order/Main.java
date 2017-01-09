@@ -5,6 +5,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,11 +26,23 @@ public final class Main implements Runnable {
 
     public Main(final Args args) {
         this.args = args;
-        this.movement = new Movement(args.target);
+        this.movement = new Movement(args.target, args.pathElements);
     }
 
     public static void main(final String[] args) {
-        new Main(new Args(args)).run();
+        try {
+            new Main(new Args(args)).run();
+        } catch (Exception e) {
+            System.out.println("expected arguments: TARGET PATH_ELEMENTS SOURCE1 [SOURCE2 [...]]");
+            System.out.println();
+            System.out.println("where PATH_ELEMENTS: Y/M/D/X");
+            System.out.println();
+            System.out.print("given arguments: ");
+            System.out.println(Arrays.asList(args));
+            System.out.println();
+            System.out.print("problem: ");
+            e.printStackTrace(System.out);
+        }
     }
 
     @Override

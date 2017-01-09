@@ -15,30 +15,35 @@ import java.time.ZonedDateTime;
 
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.Arrays.asList;
+import static net.team33.order.Resolver.PathElement.DAY;
+import static net.team33.order.Resolver.PathElement.EXTENSION;
+import static net.team33.order.Resolver.PathElement.MONTH;
+import static net.team33.order.Resolver.PathElement.YEAR;
 
 public class MovementTest {
 
     private static final String FILENAME = "MovementTest.java";
 
-    private Path origin;
     private Path subject;
-    private Path targetRoot;
     private Path result;
     private Movement movement;
-    private ZonedDateTime dateTime;
 
     @Before
     public void setUp() throws Exception {
-        origin = Paths.get("src", "test", "java", "net", "team33", "order", FILENAME);
+        final Path origin = Paths.get("src", "test", "java", "net", "team33", "order", FILENAME);
+        final Path targetRoot = Paths.get("target", "test", "movement", "moved");
+        final ZonedDateTime dateTime = ZonedDateTime.of(2016, 11, 28, 10, 13, 43, 1000000, ZoneId.systemDefault());
+
         subject = Paths.get("target", "test", "movement", FILENAME);
-        targetRoot = Paths.get("target", "test", "movement", "moved");
-        result = Paths.get("target", "test", "movement", "moved", "2016", "11", "28", FILENAME);
-        movement = new Movement(targetRoot);
-        dateTime = ZonedDateTime.of(2016, 11, 28, 10, 13, 43, 1000000, ZoneId.systemDefault());
+        result = Paths.get("target", "test", "movement", "moved", "11", "java", "2016", "28", FILENAME);
+        movement = new Movement(targetRoot, asList(MONTH, EXTENSION, YEAR, DAY));
+
         Walk.through(subject.getParent())
                 .when(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
                 .apply(Files::delete)
                 .run();
+
         Files.createDirectories(subject.getParent());
         Files.copy(origin, subject, REPLACE_EXISTING, COPY_ATTRIBUTES);
         Files.setLastModifiedTime(subject, FileTime.from(dateTime.toInstant()));

@@ -9,6 +9,12 @@ import java.nio.file.attribute.FileTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import static java.util.Arrays.asList;
+import static net.team33.order.Resolver.PathElement.DAY;
+import static net.team33.order.Resolver.PathElement.EXTENSION;
+import static net.team33.order.Resolver.PathElement.MONTH;
+import static net.team33.order.Resolver.PathElement.YEAR;
+
 public class ResolverTest {
 
     private Resolver resolver;
@@ -16,15 +22,15 @@ public class ResolverTest {
 
     @Before
     public void setUp() throws Exception {
-        resolver = new Resolver(Paths.get("target/test/ResolverTest"));
+        resolver = new Resolver(Paths.get("target/test/ResolverTest"), asList(YEAR, MONTH, DAY, EXTENSION));
         dateTime = ZonedDateTime.of(2016, 11, 19, 11, 37, 17, 1000000, ZoneId.systemDefault());
     }
 
     @Test
     public void apply() throws Exception {
         Assert.assertEquals(
-                Paths.get("target/test/ResolverTest/2016/11/19/"),
-                resolver.apply(FileTime.from(dateTime.toInstant()))
+                Paths.get("target/test/ResolverTest/2016/11/19/test/"),
+                resolver.resolve(FileTime.from(dateTime.toInstant()), "test")
         );
     }
 }
