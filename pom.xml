@@ -2,16 +2,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.team33.cmds</groupId>
-    <version>8.1.1-SNAPSHOT</version>
-    <!--version>8.1.1</version-->
+    <version>8.2.1-SNAPSHOT</version>
+    <!--version>8.2.1</version-->
     <name>Team33 order command</name>
     <description>Command line application to order files by their timestamps (last modified)</description>
     <artifactId>team33-order</artifactId>
-    <!-- scm>
-        <connection>scm:svn:${t33.scm.svn.url}</connection>
-        <developerConnection>scm:svn:${t33.scm.svn.url}</developerConnection>
-        <url>${t33.scm.svn.url}</url>
-    </scm -->
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -50,38 +45,6 @@
                     <target>${t33.java.version}</target>
                 </configuration>
             </plugin>
-            <!--plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8</version>
-                <configuration>
-                    <show>protected</show>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin-->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -107,16 +70,4 @@
             </plugin>
         </plugins>
     </build>
-    <!-- distributionManagement>
-        <repository>
-            <id>releases</id>
-            <name>Nexus Release Repository</name>
-            <url>http://host4.team33.net:11080/nexus/content/repositories/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>Nexus Snapshot Repository</name>
-            <url>http://host4.team33.net:11080/nexus/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement -->
 </project>

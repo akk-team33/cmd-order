@@ -26,7 +26,7 @@ public final class Main implements Runnable {
 
     public Main(final Args args) {
         this.args = args;
-        this.movement = new Movement(args.target, args.pathElements);
+        this.movement = new Movement(args.target, null);
     }
 
     public static void main(final String[] args) {
