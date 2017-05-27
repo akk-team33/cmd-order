@@ -10,11 +10,11 @@ import java.util.List;
 public class Movement {
 
     private final Path targetRoot;
-    private final Solver resolver;
+    private final Resolver resolver;
 
-    public Movement(final Path targetRoot, final List<Solver.Element> elements) {
+    public Movement(final Path targetRoot, final List<Resolver.Element> elements) {
         this.targetRoot = targetRoot;
-        this.resolver = new Solver(elements);
+        this.resolver = new Resolver(elements);
     }
 
     public void accept(final Path path) throws IOException {

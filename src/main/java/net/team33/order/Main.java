@@ -5,86 +5,125 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 
-@SuppressWarnings("UseOfSystemOutOrSystemErr")
-public final class Main implements Runnable {
+public class Main implements Runnable {
 
     private final LinkOption[] options = new LinkOption[]{NOFOLLOW_LINKS};
     private final Map<Path, Exception> problems = new TreeMap<>();
     private final List<Path> skipped = new LinkedList<>();
     private final List<Path> ignored = new LinkedList<>();
-    private final Args args;
-    private final Movement movement;
 
-    public Main(final Args args) {
-        this.args = args;
-        this.movement = new Movement(args.target, null);
+    private final Path targetRoot;
+    private final List<Resolver.Element> targetSub;
+    private final List<Path> origins;
+    private final Movement movement;
+    private final Output out;
+
+    public Main(final Output out, final List<String> args) throws InitialisationException {
+        try {
+            this.targetRoot = normal(args.get(0));
+            this.targetSub = Stream.of(args.get(1).split(Pattern.quote("/")))
+                    .filter(e -> !"".equals(e))
+                    .map(Resolver.Element::valueOf)
+                    .collect(Collectors.toList());
+            this.origins = args.stream().skip(2).map(Main::normal).collect(Collectors.toList());
+            this.movement = new Movement(targetRoot, targetSub);
+            this.out = out;
+        } catch (final Exception ignored) {
+            throw new InitialisationException();
+        }
     }
 
     public static void main(final String[] args) {
+        final Output out = new Output();
         try {
-            new Main(new Args(args)).run();
-        } catch (Exception e) {
-            System.out.println("expected arguments: TARGET PATH_ELEMENTS SOURCE1 [SOURCE2 [...]]");
-            System.out.println();
-            System.out.println("where PATH_ELEMENTS: Y/M/D/X");
-            System.out.println();
-            System.out.print("given arguments: ");
-            System.out.println(Arrays.asList(args));
-            System.out.println();
-            System.out.print("problem: ");
-            e.printStackTrace(System.out);
+            new Main(out, Arrays.asList(args)).run();
+        } catch (InitialisationException e) {
+            if (args.length > 0) {
+                out.println("Given Arguments:")
+                        .println()
+                        .println("    ", Stream.of(args).collect(Collectors.joining(" ")))
+                        .println();
+            }
+            out.println("Required Arguments:")
+                    .println()
+                    .println("    $target $substructure $origin [$origin [...]]")
+                    .println()
+                    .println("$target:")
+                    .println("    Path to a target root directory")
+                    .println()
+                    .println("$substructure:")
+                    .println(
+                            "    the formal target subdirectory structure: a subset of ",
+                            Stream.of(Resolver.Element.values())
+                                    .map(Resolver.Element::name)
+                                    .collect(Collectors.joining("/")),
+                            " in arbitrary order where ...")
+                    .printEach(
+                            Stream.of(Resolver.Element.values()),
+                            element -> new Object[]{"    - ", element, ": ", element.description})
+                    .println()
+                    .println("$origin:")
+                    .println("    Path to a file or directory to be ordered (recursively)");
         }
     }
 
+    private static Path normal(final String path) {
+        return normal(Paths.get(path));
+    }
+
+    private static Path normal(final Path path) {
+        return path.toAbsolutePath().normalize();
+    }
+
     @Override
-    public final void run() {
-        proceed(args.sources.iterator());
+    public void run() {
+        proceed(origins.iterator());
 
         if (0 < skipped.size()) {
-            System.out.println();
-            System.out.println("[skipped]");
-            skipped.forEach(System.out::println);
+            out.println().println("[skipped]");
+            skipped.forEach(out::println);
         }
 
         if (0 < ignored.size()) {
-            System.out.println();
-            System.out.println("[ignored]");
-            ignored.forEach(System.out::println);
+            out.println().println("[ignored]");
+            ignored.forEach(out::println);
         }
 
         if (0 < problems.size()) {
-            System.out.println();
-            System.out.println("[problems]");
+            out.println().println("[problems]");
             problems.entrySet().forEach(entry -> {
-                System.out.print(entry.getKey());
-                System.out.println(" -> ");
-                entry.getValue().printStackTrace(System.out);
-                System.out.println();
+                out.println(entry.getKey(), " -> ")
+                        .printStackTrace(entry.getValue())
+                        .println();
             });
         }
     }
 
-    private void proceed(final Iterator<Path> iterator) {
-        while (iterator.hasNext()) {
-            proceed(iterator.next());
+    private void proceed(final Iterator<Path> paths) {
+        while (paths.hasNext()) {
+            proceed(paths.next());
         }
     }
 
     private void proceed(final Path path) {
-        System.out.println(path);
-        if (path.equals(args.target)) {
+        out.println(path);
+        if (path.equals(targetRoot)) {
             skipped.add(path);
         } else if (Files.isRegularFile(path, options)) {
-            movement(path);
+            move(path);
         } else if (Files.isDirectory(path, options)) {
             recursion(path);
         } else {
@@ -92,21 +131,26 @@ public final class Main implements Runnable {
         }
     }
 
-    private void movement(final Path path) {
+    private void move(final Path path) {
         try {
             movement.accept(path);
-        } catch (final IOException caught) {
-            problems.put(path, caught);
+        } catch (IOException e) {
+            problems.put(path, e);
         }
     }
 
     private void recursion(final Path path) {
+        try (final DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
+            proceed(paths.iterator());
+        } catch (IOException e) {
+            problems.put(path, e);
+        }
         try {
-            try (final DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
-                proceed(paths.iterator());
-            }
             Files.delete(path);
         } catch (final IOException ignored) {
         }
+    }
+
+    private static class InitialisationException extends Exception {
     }
 }

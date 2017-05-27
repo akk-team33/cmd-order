@@ -16,10 +16,11 @@ import java.time.ZonedDateTime;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.asList;
-import static net.team33.order.Solver.Element.D;
-import static net.team33.order.Solver.Element.M;
-import static net.team33.order.Solver.Element.X;
-import static net.team33.order.Solver.Element.Y;
+import static net.team33.order.Resolver.Element.D;
+import static net.team33.order.Resolver.Element.M;
+import static net.team33.order.Resolver.Element.OX;
+import static net.team33.order.Resolver.Element.X;
+import static net.team33.order.Resolver.Element.Y;
 
 public class MovementTest {
 
@@ -37,7 +38,7 @@ public class MovementTest {
 
         subject = Paths.get("target", "test", "movement", FILENAME);
         result = Paths.get("target", "test", "movement", "moved", "11", "java", "2016", "28", FILENAME);
-        movement = new Movement(targetRoot, asList(M, X, Y, D));
+        movement = new Movement(targetRoot, asList(M, X, Y, D, OX));
 
         Walk.through(subject.getParent())
                 .when(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))

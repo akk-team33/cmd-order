@@ -1,62 +1,85 @@
 package net.team33.order;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
-import static java.util.Collections.unmodifiableList;
+public class Resolver implements BiFunction<String, FileTime, Path> {
 
-class Resolver {
+    private List<Element> elements;
 
-    private final Path root;
-    private final List<PathElement> elements;
-
-    Resolver(final Path root, final List<PathElement> elements) {
-        this.root = root;
-        this.elements = unmodifiableList(new ArrayList<>(elements));
+    Resolver(final List<Element> elements) {
+        this.elements = elements;
     }
 
-    public Path resolve(final FileTime fileTime, final String extension) {
-        final ZonedDateTime zoned = fileTime.toInstant().atZone(ZoneId.systemDefault());
-        Path newParent = root;
-        for (final PathElement element : elements)
-            newParent = newParent.resolve(element.resolve(zoned, extension));
-        return newParent;
+    @Override
+    public Path apply(final String fileName, final FileTime fileTime) {
+        final long millis = fileTime.toMillis();
+        final ZonedDateTime dateTime = ZonedDateTime.ofInstant(fileTime.toInstant(), ZoneId.systemDefault());
+        final int dotPos = fileName.lastIndexOf('.');
+        final Optional<String> extension = (0 > dotPos)
+                ? Optional.empty()
+                : Optional.of(fileName.substring(dotPos + 1));
+
+        Path result = Paths.get("");
+        for (final Element element : elements) {
+            result = result.resolve(element.resolve(
+                    fileName,
+                    millis,
+                    dateTime,
+                    extension
+            ));
+        }
+        return result;
     }
 
-    public enum PathElement {
-        YEAR("Y", (zdt, ext) -> String.format("%04d", zdt.getYear())),
-        MONTH("M", (zdt, ext) -> String.format("%02d", zdt.getMonthValue())),
-        DAY("D", (zdt, ext) -> String.format("%02d", zdt.getDayOfMonth())),
-        EXTENSION("X", (zdt, ext) -> ext);
+    enum Element {
+        Y("Takes the year value from the file time, eg. \"2017\"") {
+            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
+                return String.format("%04d", t.getYear());
+            }
+        },
+        M("Takes the month value from the file time, eg. \"05\" (for May)") {
+            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
+                return String.format("%02d", t.getMonthValue());
+            }
+        },
+        D("Takes the day of month value from the file time, eg. \"27\" (for the 27th day in May)") {
+            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
+                return String.format("%02d", t.getDayOfMonth());
+            }
+        },
+        X("Takes the original file name extension, eg. \"jpg\"") {
+            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
+                return x.orElse("").toLowerCase();
+            }
+        },
+        LX("Takes the file time as a long value in hex representation and the original file name extension") {
+            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
+                return Long.toHexString(m) + x.map(e -> "." + e).orElse("");
+            }
+        },
+        OX("Takes the original file name (including extension)") {
+            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
+                return n;
+            }
+        };
 
-        private final String symbol;
-        private final Extractor extractor;
+        final String description;
 
-        PathElement(final String symbol, final Extractor extractor) {
-            this.symbol = symbol;
-            this.extractor = extractor;
+        Element(final String description) {
+            this.description = description;
         }
 
-        public static PathElement from(final String element) {
-            return Stream.of(values())
-                    .filter(entry -> entry.symbol.equals(element))
-                    .findFirst()
-                    .orElseThrow(() -> new NoSuchElementException("Unknown: '" + element + "'"));
-        }
-
-        private String resolve(final ZonedDateTime zoned, final String extension) {
-            return extractor.extract(zoned, extension);
-        }
-
-        @FunctionalInterface
-        private interface Extractor {
-            String extract(ZonedDateTime zoned, String extension);
-        }
+        abstract String resolve(
+                final String n,
+                final long m,
+                final ZonedDateTime t,
+                final Optional<String> x);
     }
 }
