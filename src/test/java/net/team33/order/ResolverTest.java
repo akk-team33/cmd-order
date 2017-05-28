@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 
 import static java.util.Arrays.asList;
 import static net.team33.order.Resolver.Element.D;
-import static net.team33.order.Resolver.Element.LX;
+import static net.team33.order.Resolver.Element.L;
 import static net.team33.order.Resolver.Element.M;
 import static net.team33.order.Resolver.Element.Y;
 
@@ -25,19 +25,39 @@ public class ResolverTest {
     @Before
     public void setUp() throws Exception {
         root = Paths.get("target/test/ResolverTest");
-        resolver = new Resolver(asList(Y, M, D, LX));
+        resolver = new Resolver(asList(Y, M, D, L));
         dateTime = ZonedDateTime.of(2016, 11, 19, 11, 37, 17, 1000000, ZoneId.systemDefault());
     }
 
     @Test
-    public void apply() throws Exception {
-        Assert.assertEquals(
-                Paths.get("target/test/ResolverTest/2016/11/19/1587c296349"),
-                root.resolve(resolver.apply("test", FileTime.from(dateTime.toInstant())))
-        );
+    public void applyWithExtension0() throws Exception {
         Assert.assertEquals(
                 Paths.get("target/test/ResolverTest/2016/11/19/1587c296349.mpg"),
-                root.resolve(resolver.apply("test.mpg", FileTime.from(dateTime.toInstant())))
+                root.resolve(resolver.apply(new FileName("test.mpg", FileTime.from(dateTime.toInstant()))).apply(0))
+        );
+    }
+
+    @Test
+    public void applyWithExtension278() throws Exception {
+        Assert.assertEquals(
+                Paths.get("target/test/ResolverTest/2016/11/19/1587c296349[278].mpg"),
+                root.resolve(resolver.apply(new FileName("test.mpg", FileTime.from(dateTime.toInstant()))).apply(278))
+        );
+    }
+
+    @Test
+    public void applyWithoutExtension0() throws Exception {
+        Assert.assertEquals(
+                Paths.get("target/test/ResolverTest/2016/11/19/1587c296349"),
+                root.resolve(resolver.apply(new FileName("test", FileTime.from(dateTime.toInstant()))).apply(0))
+        );
+    }
+
+    @Test
+    public void applyWithoutExtension278() throws Exception {
+        Assert.assertEquals(
+                Paths.get("target/test/ResolverTest/2016/11/19/1587c296349[278]"),
+                root.resolve(resolver.apply(new FileName("test", FileTime.from(dateTime.toInstant()))).apply(278))
         );
     }
 }

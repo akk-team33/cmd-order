@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileTime;
 import java.util.List;
+import java.util.function.Function;
 
 public class Movement {
 
@@ -18,9 +18,17 @@ public class Movement {
     }
 
     public void accept(final Path path) throws IOException {
-        final FileTime lastModifiedTime = Files.getLastModifiedTime(path, LinkOption.NOFOLLOW_LINKS);
-        final Path target = targetRoot.resolve(resolver.apply(path.getFileName().toString(), lastModifiedTime));
+        final Function<Integer, String> resolving = resolver.apply(new FileName(path));
+        final Path target = newTarget(resolving);
         Files.createDirectories(target.getParent());
         Files.move(path, target);
+    }
+
+    private Path newTarget(final Function<Integer, String> resolving) {
+        Path target = targetRoot.resolve(resolving.apply(0));
+        for (int index = 1; Files.exists(target, LinkOption.NOFOLLOW_LINKS); ++index) {
+            target = targetRoot.resolve(resolving.apply(index));
+        }
+        return target;
     }
 }

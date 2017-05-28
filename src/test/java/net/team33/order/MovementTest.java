@@ -18,7 +18,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.asList;
 import static net.team33.order.Resolver.Element.D;
 import static net.team33.order.Resolver.Element.M;
-import static net.team33.order.Resolver.Element.OX;
+import static net.team33.order.Resolver.Element.N;
 import static net.team33.order.Resolver.Element.X;
 import static net.team33.order.Resolver.Element.Y;
 
@@ -38,7 +38,7 @@ public class MovementTest {
 
         subject = Paths.get("target", "test", "movement", FILENAME);
         result = Paths.get("target", "test", "movement", "moved", "11", "java", "2016", "28", FILENAME);
-        movement = new Movement(targetRoot, asList(M, X, Y, D, OX));
+        movement = new Movement(targetRoot, asList(M, X, Y, D, N));
 
         Walk.through(subject.getParent())
                 .when(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))

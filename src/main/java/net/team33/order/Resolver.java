@@ -2,14 +2,10 @@ package net.team33.order;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
-public class Resolver implements BiFunction<String, FileTime, Path> {
+public class Resolver implements Function<FileName, Function<Integer, String>> {
 
     private List<Element> elements;
 
@@ -18,55 +14,45 @@ public class Resolver implements BiFunction<String, FileTime, Path> {
     }
 
     @Override
-    public Path apply(final String fileName, final FileTime fileTime) {
-        final long millis = fileTime.toMillis();
-        final ZonedDateTime dateTime = ZonedDateTime.ofInstant(fileTime.toInstant(), ZoneId.systemDefault());
-        final int dotPos = fileName.lastIndexOf('.');
-        final Optional<String> extension = (0 > dotPos)
-                ? Optional.empty()
-                : Optional.of(fileName.substring(dotPos + 1));
-
-        Path result = Paths.get("");
-        for (final Element element : elements) {
-            result = result.resolve(element.resolve(
-                    fileName,
-                    millis,
-                    dateTime,
-                    extension
-            ));
-        }
-        return result;
+    public Function<Integer, String> apply(final FileName fileName) {
+        final String result = elements.stream()
+                .map(e -> e.resolve(fileName))
+                .reduce(Paths.get(""), Path::resolve, Path::resolve)
+                .toString();
+        return index -> result
+                + ((0 < index) ? "[" + index + "]" : "")
+                + fileName.suffix.map(x -> "." + x).orElse("");
     }
 
     enum Element {
         Y("Takes the year value from the file time, eg. \"2017\"") {
-            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
-                return String.format("%04d", t.getYear());
+            @Override String resolve(final FileName fileName) {
+                return String.format("%04d", fileName.zoned.getYear());
             }
         },
         M("Takes the month value from the file time, eg. \"05\" (for May)") {
-            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
-                return String.format("%02d", t.getMonthValue());
+            @Override String resolve(final FileName fileName) {
+                return String.format("%02d", fileName.zoned.getMonthValue());
             }
         },
         D("Takes the day of month value from the file time, eg. \"27\" (for the 27th day in May)") {
-            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
-                return String.format("%02d", t.getDayOfMonth());
+            @Override String resolve(final FileName fileName) {
+                return String.format("%02d", fileName.zoned.getDayOfMonth());
             }
         },
         X("Takes the original file name extension, eg. \"jpg\"") {
-            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
-                return x.orElse("").toLowerCase();
+            @Override String resolve(final FileName fileName) {
+                return fileName.suffix.orElse("").toLowerCase();
             }
         },
-        LX("Takes the file time as a long value in hex representation and the original file name extension") {
-            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
-                return Long.toHexString(m) + x.map(e -> "." + e).orElse("");
+        L("Takes the file time as a long value in hex representation") {
+            @Override String resolve(final FileName fileName) {
+                return Long.toHexString(fileName.millis);
             }
         },
-        OX("Takes the original file name (including extension)") {
-            @Override String resolve(final String n, final long m, final ZonedDateTime t, final Optional<String> x) {
-                return n;
+        N("Takes the original file name") {
+            @Override String resolve(final FileName fileName) {
+                return fileName.prefix;
             }
         };
 
@@ -76,10 +62,6 @@ public class Resolver implements BiFunction<String, FileTime, Path> {
             this.description = description;
         }
 
-        abstract String resolve(
-                final String n,
-                final long m,
-                final ZonedDateTime t,
-                final Optional<String> x);
+        abstract String resolve(final FileName fileName);
     }
 }
