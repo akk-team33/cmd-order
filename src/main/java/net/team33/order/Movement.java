@@ -11,10 +11,12 @@ public class Movement {
 
     private final Path targetRoot;
     private final Resolver resolver;
+    private final Output out;
 
-    public Movement(final Path targetRoot, final List<Resolver.Element> elements) {
+    public Movement(final Path targetRoot, final List<Resolver.Element> elements, final Output out) {
         this.targetRoot = targetRoot;
         this.resolver = new Resolver(elements);
+        this.out = out;
     }
 
     public void accept(final Path path) throws IOException {
@@ -22,6 +24,7 @@ public class Movement {
         final Path target = newTarget(resolving);
         Files.createDirectories(target.getParent());
         Files.move(path, target);
+        out.println("moved: ", path, " -> ", target);
     }
 
     private Path newTarget(final Function<Integer, String> resolving) {

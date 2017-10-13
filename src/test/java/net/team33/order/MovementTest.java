@@ -38,7 +38,7 @@ public class MovementTest {
 
         subject = Paths.get("target", "test", "movement", FILENAME);
         result = Paths.get("target", "test", "movement", "moved", "11", "java", "2016", "28", FILENAME);
-        movement = new Movement(targetRoot, asList(M, X, Y, D, N));
+        movement = new Movement(targetRoot, asList(M, X, Y, D, N), new Output());
 
         Walk.through(subject.getParent())
                 .when(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))

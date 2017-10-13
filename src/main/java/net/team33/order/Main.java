@@ -39,7 +39,7 @@ public class Main implements Runnable {
                     .map(Resolver.Element::valueOf)
                     .collect(Collectors.toList());
             this.origins = args.stream().skip(2).map(Main::normal).collect(Collectors.toList());
-            this.movement = new Movement(targetRoot, targetSub);
+            this.movement = new Movement(targetRoot, targetSub, out);
             this.out = out;
         } catch (final Exception ignored) {
             throw new InitialisationException();
@@ -119,7 +119,6 @@ public class Main implements Runnable {
     }
 
     private void proceed(final Path path) {
-        out.println(path);
         if (path.equals(targetRoot)) {
             skipped.add(path);
         } else if (Files.isRegularFile(path, options)) {
@@ -147,6 +146,7 @@ public class Main implements Runnable {
         }
         try {
             Files.delete(path);
+            out.println("removed: ", path);
         } catch (final IOException ignored) {
         }
     }
