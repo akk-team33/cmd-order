@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class Output {
+class Output {
 
     private PrintStream out = System.out;
 
